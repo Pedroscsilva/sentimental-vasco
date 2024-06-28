@@ -44,19 +44,21 @@ def get_specific_new(additional_href):
 def get_facebook_commentaries(driver):
     iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
     driver.switch_to.frame(iframe)
-    WebDriverWait(driver, 20).until(
+    WebDriverWait(driver, 6).until(
         EC.presence_of_element_located((By.CLASS_NAME, '_5mdd'))
     )
     html = driver.page_source
     soup = BeautifulSoup(html, 'html.parser')
-    return soup.prettify()
+    tags = soup.select('._5mdd span')
+    return [('facebook', tag.get_text(separator=' ')) for tag in tags]
 
 def get_supervasco_commentaries(driver):
     driver.switch_to.frame('id_iframe_comment')
     html = driver.page_source
     soup = BeautifulSoup(html, "html.parser")
 
-    return soup.prettify()
+    tags = soup.select('.pb-3 > p')
+    return [('supervasco', tag.text) for tag in tags]
 
 def get_commentaries(additional_href):
     options = Options()
@@ -67,16 +69,9 @@ def get_commentaries(additional_href):
         fb = get_facebook_commentaries(driver)
         driver.switch_to.parent_frame()
         vs = get_supervasco_commentaries(driver)
+        print(fb)
+        print('\n')
+        print(vs)
 
-    #     iframe = driver.find_element(By.ID, 'id_iframe_comment')
-    #     driver.switch_to.frame('id_iframe_comment')
-
-    #     html = driver.page_source
-    #     soup = BeautifulSoup(html, "html.parser")
-
-    with open('fb.html', 'w') as file:
-        file.write(fb)
-    # with open('vs.html', 'w') as file:
-    #     file.write(vs)
     
     print('done')

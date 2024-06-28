@@ -10,7 +10,7 @@ def main():
     terminal_menu = TerminalMenu(options)
     menu_entry_index = terminal_menu.show()
     get_specific_new(all_news[menu_entry_index]["href"])
-    get_commentaries('/noticias/ao-que-tudo-indica-rafael-paiva-seguira-no-comando-contra-o-botafogo-394894.html')
+    get_commentaries('/noticias/doria-tem-contrato-com-o-santos-laguna-ate-2025-394971.html')
     input()
     main()
 

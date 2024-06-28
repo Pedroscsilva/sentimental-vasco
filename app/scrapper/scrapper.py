@@ -41,27 +41,42 @@ def get_specific_new(additional_href):
         if html.text != "":
             print(html.text)
 
+def get_facebook_commentaries(driver):
+    iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
+    driver.switch_to.frame(iframe)
+    WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.CLASS_NAME, '_5mdd'))
+    )
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.prettify()
+
+def get_supervasco_commentaries(driver):
+    driver.switch_to.frame('id_iframe_comment')
+    html = driver.page_source
+    soup = BeautifulSoup(html, "html.parser")
+
+    return soup.prettify()
+
 def get_commentaries(additional_href):
     options = Options()
-    # options.add_argument('-headless')
-    firefox_profile = FirefoxProfile()
-    firefox_profile.set_preference('javascript.enabled', True)
-    options.profile = firefox_profile
+    options.add_argument('-headless')
 
     with Firefox(options=options) as driver:
         driver.get(f"{basic_url}{additional_href}")
-        
-        element = driver.find_element(By.CLASS_NAME, 'comment-tabs')
-        driver.execute_script("arguments[0].scrollIntoView();", element)
+        fb = get_facebook_commentaries(driver)
+        driver.switch_to.parent_frame()
+        vs = get_supervasco_commentaries(driver)
 
-        driver.implicitly_wait(2)
-        iframe = driver.find_element(By.ID, 'id_iframe_comment')
-        driver.switch_to.frame('id_iframe_comment')
+    #     iframe = driver.find_element(By.ID, 'id_iframe_comment')
+    #     driver.switch_to.frame('id_iframe_comment')
 
-        html = driver.page_source
-        soup = BeautifulSoup(html, "html.parser")
+    #     html = driver.page_source
+    #     soup = BeautifulSoup(html, "html.parser")
 
-    with open('file.html', 'w') as file:
-        file.write(soup.prettify())
+    with open('fb.html', 'w') as file:
+        file.write(fb)
+    # with open('vs.html', 'w') as file:
+    #     file.write(vs)
     
     print('done')

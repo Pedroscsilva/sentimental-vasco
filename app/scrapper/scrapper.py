@@ -41,6 +41,14 @@ def get_specific_new(additional_href):
         if html.text != "":
             print(html.text)
 
+
+def get_extracted_page_data(driver):
+    html = driver.page_source
+    soup = BeautifulSoup(html, 'html.parser')
+
+    print(html.page_title)
+
+
 def get_facebook_commentaries(driver):
     iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
     driver.switch_to.frame(iframe)
@@ -66,7 +74,10 @@ def get_commentaries(additional_href):
 
     with Firefox(options=options) as driver:
         driver.get(f"{basic_url}{additional_href}")
-        fb = get_facebook_commentaries(driver)
+        try:
+            fb = get_facebook_commentaries(driver)
+        except:
+            fb = []
         driver.switch_to.parent_frame()
         vs = get_supervasco_commentaries(driver)
         print(fb)

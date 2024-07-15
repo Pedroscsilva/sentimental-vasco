@@ -1,17 +1,12 @@
 #!/usr/bin/python
 
 from scrapper import VascoScrapper
-from simple_term_menu import TerminalMenu
-
 
 def main():
     vs = VascoScrapper()
-    all_news = vs.get_all_news()
-    options = [d.get("title", None) for d in all_news]
-    terminal_menu = TerminalMenu(options)
-    menu_entry_index = terminal_menu.show()
-    vs.get_news_data(all_news[menu_entry_index]["href"])
-    vs.get_commentaries('/noticias/feminino-registros-do-treino-desta-quinta-27-394936.html')
+    all_news = vs.get_min_x_news(10)
+    print(all_news)
+    vs.get_commentaries('/noticias/vasco-abriu-negociacao-com-pepe-que-nao-deseja-jogar-no-brasil-396336.html')
     input()
     main()
 

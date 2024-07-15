@@ -1,7 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-# from selenium.webdriver import Chrome
-# from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver import Firefox
@@ -17,22 +15,30 @@ class VascoScrapper:
         self.basic_url = "https://www.supervasco.com"
         self.obtained_page = pd.DataFrame(columns=['index', 'datetime', 'title', 'link'])
         self.commentaries = pd.DataFrame(columns=['index', 'commentary_source', 'commentary'])
-        
-
-# basic_url = "https://www.supervasco.com"
+        self.hrefs = {'count': 0, 'hrefs': []}
 
 
-    def get_all_news(self):
-        page = requests.get(self.basic_url)
-        html_content = page.text
-
+    def get_all_news_in_page(self, html_content):
         soup = BeautifulSoup(html_content, "html.parser")
 
-        page_titles = soup.select("h4 a")
+        page_titles = soup.select(".latest-news-inner > ul li")
+        for title in page_titles:
+            try:
+                comment_count = int(title.select_one('small').text.strip('\n'))
+            except:
+                comment_count = 0
+            if  comment_count > 0:
+                self.hrefs['count'] += comment_count
+                self.hrefs['hrefs'].append(title.select_one('a').attrs['href'])
+            
+    def get_min_x_news(self, quantity, page=1):
+        content = requests.get(f'{self.basic_url}/ultimas-noticias-vasco/?page={page}')
+        html_content = content.text
+        
+        self.get_all_news_in_page(html_content)
 
-        page_attrs = map(lambda title: title.attrs, page_titles)
-
-        return list(page_attrs)
+        if quantity > self.hrefs['count']:
+            self.get_x_news(quantity, page+1)
 
 
     def get_news_data(self, additional_href):
@@ -50,17 +56,11 @@ class VascoScrapper:
                 print(html.text)
 
 
-    def get_extracted_page_data(self, driver):
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-
-        print(html.page_title)
-
 
     def get_facebook_commentaries(self, driver):
         iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
         driver.switch_to.frame(iframe)
-        WebDriverWait(driver, 6).until(
+        WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, '_5mdd'))
         )
         html = driver.page_source
@@ -82,14 +82,14 @@ class VascoScrapper:
 
         with Firefox(options=options) as driver:
             driver.get(f"{self.basic_url}{additional_href}")
-            try:
-                fb = self.get_facebook_commentaries(driver)
-            except:
-                fb = []
-            driver.switch_to.parent_frame()
+            # disabled until I go back to brazil
+            # try:
+            #     fb = self.get_facebook_commentaries(driver)
+            # except:
+            #     fb = []
+            # driver.switch_to.parent_frame()
             vs = self.get_supervasco_commentaries(driver)
-            print(fb)
-            print('\n')
+            # print(fb)
             print(vs)
 
         

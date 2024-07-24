@@ -93,7 +93,10 @@ class VascoScrapper:
         self.commentaries = pd.concat([self.commentaries, commentaries_df])
 
     def get_page_metadata(self, driver, additional_href):
-        title_elem = driver.find_element(By.XPATH, '//meta[@property="og:title"]')
+        title_elem = driver.find_element(
+            By.XPATH,
+            '//meta[@property="og:title"]'
+        )
         title = title_elem.get_attribute('content')
 
         date_elem = driver.find_element(

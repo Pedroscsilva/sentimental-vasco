@@ -4,12 +4,11 @@ from scrapper import VascoScrapper
 
 def main():
     vs = VascoScrapper()
-    all_news = vs.get_min_x_news(10)
-    print(all_news)
-    vs.get_commentaries('/noticias/vasco-abriu-negociacao-com-pepe-que-nao-deseja-jogar-no-brasil-396336.html')
-    input()
-    main()
+    vs.get_min_x_news(10)
 
+    vs.get_page_data('/noticias/pedrinho-completa-6-meses-no-vasco-confira-os-proximos-desafios-397313.html')
+    vs.get_page_data('/noticias/ntv-aborda-os-principais-motivos-para-as-lesoes-no-vasco-397315.html')
+    print(vs.commentaries)
 
 if __name__ == "__main__":
     main()

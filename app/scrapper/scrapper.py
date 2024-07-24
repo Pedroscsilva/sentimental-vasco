@@ -1,22 +1,19 @@
 import requests
 from bs4 import BeautifulSoup
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 from selenium.webdriver import Firefox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver import ActionChains
-import time
 import pandas as pd
+
 
 class VascoScrapper:
     def __init__(self):
         self.basic_url = "https://www.supervasco.com"
-        self.obtained_page = pd.DataFrame(columns=['index', 'datetime', 'title', 'link'])
-        self.commentaries = pd.DataFrame(columns=['index', 'commentary_source', 'commentary'])
+        self.obtained_page = pd.DataFrame(columns=['datetime', 'title', 'link'])
+        self.commentaries = pd.DataFrame(columns=['pg_index', 'commentary_source', 'commentary'])
         self.hrefs = {'count': 0, 'hrefs': []}
-
 
     def get_all_news_in_page(self, html_content):
         soup = BeautifulSoup(html_content, "html.parser")
@@ -25,21 +22,20 @@ class VascoScrapper:
         for title in page_titles:
             try:
                 comment_count = int(title.select_one('small').text.strip('\n'))
-            except:
+            except Exception:
                 comment_count = 0
-            if  comment_count > 0:
+            if comment_count > 0:
                 self.hrefs['count'] += comment_count
                 self.hrefs['hrefs'].append(title.select_one('a').attrs['href'])
-            
+
     def get_min_x_news(self, quantity, page=1):
         content = requests.get(f'{self.basic_url}/ultimas-noticias-vasco/?page={page}')
         html_content = content.text
-        
+
         self.get_all_news_in_page(html_content)
 
         if quantity > self.hrefs['count']:
-            self.get_x_news(quantity, page+1)
-
+            self.get_min_x_news(quantity, page+1)
 
     def get_news_data(self, additional_href):
         page = requests.get(f"{self.basic_url}{additional_href}")
@@ -54,8 +50,6 @@ class VascoScrapper:
         for html in page_text_html:
             if html.text != "":
                 print(html.text)
-
-
 
     def get_facebook_commentaries(self, driver):
         iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
@@ -74,9 +68,37 @@ class VascoScrapper:
         soup = BeautifulSoup(html, "html.parser")
 
         tags = soup.select('.pb-3 > p')
-        return [('supervasco', tag.text) for tag in tags]
 
-    def get_commentaries(self, additional_href):
+        commentaries_dict = {
+            'pg_index': [],
+            'commentary_source': [],
+            'commentary': []
+        }
+        pg_index = self.obtained_page.index[-1]
+        for tag in tags:
+            commentaries_dict['pg_index'].append(pg_index)
+            commentaries_dict['commentary_source'].append('supervasco')
+            commentaries_dict['commentary'].append(tag.text)
+        
+        commentaries_df = pd.DataFrame(commentaries_dict)
+        self.commentaries = pd.concat([self.commentaries, commentaries_df])
+
+    def get_page_metadata(self, driver, additional_href):
+        title_elem = driver.find_element(By.XPATH, '//meta[@property="og:title"]')
+        title = title_elem.get_attribute('content')
+
+        date_elem = driver.find_element(By.CSS_SELECTOR, 'meta[property="article:published_time"]')
+        date = date_elem.get_attribute('content')
+
+        new_data = pd.DataFrame({
+            'datetime': date,
+            'title': title,
+            'link': additional_href
+        }, index=[self.obtained_page.shape[0]])
+
+        self.obtained_page = pd.concat([self.obtained_page, new_data])
+
+    def get_page_data(self, additional_href):
         options = Options()
         options.add_argument('-headless')
 
@@ -88,9 +110,6 @@ class VascoScrapper:
             # except:
             #     fb = []
             # driver.switch_to.parent_frame()
-            vs = self.get_supervasco_commentaries(driver)
-            # print(fb)
-            print(vs)
+            self.get_page_metadata(driver, additional_href)
 
-        
-        print('done')
+            self.get_supervasco_commentaries(driver)

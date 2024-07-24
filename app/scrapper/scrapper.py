@@ -11,8 +11,12 @@ import pandas as pd
 class VascoScrapper:
     def __init__(self):
         self.basic_url = "https://www.supervasco.com"
-        self.obtained_page = pd.DataFrame(columns=['datetime', 'title', 'link'])
-        self.commentaries = pd.DataFrame(columns=['pg_index', 'commentary_source', 'commentary'])
+        self.obtained_page = pd.DataFrame(
+            columns=['datetime', 'title', 'link']
+        )
+        self.commentaries = pd.DataFrame(
+            columns=['pg_index', 'commentary_source', 'commentary']
+        )
         self.hrefs = {'count': 0, 'hrefs': []}
 
     def get_all_news_in_page(self, html_content):
@@ -29,7 +33,9 @@ class VascoScrapper:
                 self.hrefs['hrefs'].append(title.select_one('a').attrs['href'])
 
     def get_min_x_news(self, quantity, page=1):
-        content = requests.get(f'{self.basic_url}/ultimas-noticias-vasco/?page={page}')
+        content = requests.get(
+            f'{self.basic_url}/ultimas-noticias-vasco/?page={page}'
+        )
         html_content = content.text
 
         self.get_all_news_in_page(html_content)
@@ -52,7 +58,10 @@ class VascoScrapper:
                 print(html.text)
 
     def get_facebook_commentaries(self, driver):
-        iframe = driver.find_element(By.CSS_SELECTOR, 'iframe[data-testid="fb:comments Facebook Social Plugin"]')
+        iframe = driver.find_element(
+            By.CSS_SELECTOR,
+            'iframe[data-testid="fb:comments Facebook Social Plugin"]'
+        )
         driver.switch_to.frame(iframe)
         WebDriverWait(driver, 5).until(
             EC.presence_of_element_located((By.CLASS_NAME, '_5mdd'))
@@ -79,7 +88,7 @@ class VascoScrapper:
             commentaries_dict['pg_index'].append(pg_index)
             commentaries_dict['commentary_source'].append('supervasco')
             commentaries_dict['commentary'].append(tag.text)
-        
+
         commentaries_df = pd.DataFrame(commentaries_dict)
         self.commentaries = pd.concat([self.commentaries, commentaries_df])
 
@@ -87,7 +96,10 @@ class VascoScrapper:
         title_elem = driver.find_element(By.XPATH, '//meta[@property="og:title"]')
         title = title_elem.get_attribute('content')
 
-        date_elem = driver.find_element(By.CSS_SELECTOR, 'meta[property="article:published_time"]')
+        date_elem = driver.find_element(
+            By.CSS_SELECTOR,
+            'meta[property="article:published_time"]'
+        )
         date = date_elem.get_attribute('content')
 
         new_data = pd.DataFrame({

@@ -5,7 +5,7 @@ from scrapper import VascoScrapper
 
 def main():
     vs = VascoScrapper()
-    vs.get_min_x_news(2)
+    vs.get_min_x_news(500)
     print('got news')
     hrefs = vs.hrefs['hrefs']
 

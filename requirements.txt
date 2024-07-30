@@ -37,6 +37,7 @@ prompt_toolkit==3.0.47
 psutil==6.0.0
 ptyprocess==0.7.0
 pure_eval==0.2.3
+pyarrow==17.0.0
 Pygments==2.18.0
 pyparsing==3.1.2
 PySocks==1.7.1

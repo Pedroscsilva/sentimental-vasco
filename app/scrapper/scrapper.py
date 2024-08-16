@@ -72,15 +72,6 @@ class VascoScrapper:
         return [('facebook', tag.get_text(separator=' ')) for tag in tags]
 
     def get_supervasco_commentaries(self, driver):
-        # element = driver.find_element(
-        #     By.CLASS_NAME, 'comment-tabs'
-        # )
-        # actions = ActionChains(driver)
-        # actions.move_to_element(element).perform()
-        # driver.execute_script(
-        #     "window.scrollTo(0, document.body.scrollHeight);"
-        # )
-
         driver.switch_to.frame('id_iframe_comment')
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
@@ -128,7 +119,6 @@ class VascoScrapper:
 
         with Firefox(options=options) as driver:
             driver.get(f"{self.basic_url}{additional_href}")
-            # time.sleep(600)
             WebDriverWait(driver, 10).until(
                 EC.presence_of_element_located((
                     By.CLASS_NAME, 'fc-cta-consent'
@@ -136,7 +126,6 @@ class VascoScrapper:
             )
             driver.find_element(By.CLASS_NAME, 'fc-cta-consent').click()
 
-            # driver.implicitly_wait(500)
             # disabled until I go back to brazil
             # try:
             #     fb = self.get_facebook_commentaries(driver)

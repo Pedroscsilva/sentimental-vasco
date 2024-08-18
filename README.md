@@ -3,7 +3,8 @@
 This project focuses on the sentiment analysis of Vasco da Gama supporters based on comments scraped from the website supervasco.com. The main goal is to understand how fans perceive various events and topics related to their football club. 
 
 The project is divided into three main parts: data scraping, model building, and data analysis.
-Project Structure
+
+**Project Structure**
 
 ```
 ├── scrapper

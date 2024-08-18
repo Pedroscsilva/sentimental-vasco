@@ -5,6 +5,7 @@ This project focuses on the sentiment analysis of Vasco da Gama supporters based
 The project is divided into three main parts: data scraping, model building, and data analysis.
 Project Structure
 
+```
 ├── scrapper
 │   ├── scrapper.py
 │   ├── main.py
@@ -25,7 +26,7 @@ Project Structure
 ├── requirements.txt
 │
 └── README.md
-
+```
 
 ## 1. Scrapper
 
